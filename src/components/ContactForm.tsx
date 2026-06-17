@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { validateEmail } from "@/lib/validation";
 
 interface ContactFormState {
   firstName: string;
@@ -20,9 +21,7 @@ export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const validateEmail = (email: string) => {
-    return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
-  };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

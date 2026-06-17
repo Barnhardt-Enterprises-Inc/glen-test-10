@@ -1,9 +1,30 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { contacts } from '@/db/schema';
+import { validateEmail } from '@/lib/validation';
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 5;
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const now = Date.now();
+    const rateLimit = rateLimitMap.get(ip);
+
+    if (rateLimit && now < rateLimit.resetAt) {
+      if (rateLimit.count >= MAX_REQUESTS) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          { status: 429 }
+        );
+      }
+      rateLimit.count++;
+    } else {
+      rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    }
+
     const body = await request.json();
     const { firstName, lastName, email, phone } = body;
 
@@ -14,9 +35,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!validateEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email address' },
         { status: 400 }
