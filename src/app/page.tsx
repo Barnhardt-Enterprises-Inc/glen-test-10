@@ -1,4 +1,5 @@
 import Navigation from '@/components/Navigation';
+// Ensure all JSX tags are correctly closed
 import CoffeeCard from '@/components/CoffeeCard';
 import { mockCoffees } from '@/lib/mockData';
 

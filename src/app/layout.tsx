@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Quetrex",
-  description: "Next-gen queue management",
+  description: "Experience the finest curated coffees and artisan brews",
 };
 
 export default function RootLayout({

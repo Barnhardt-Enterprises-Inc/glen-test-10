@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Coffee } from '@/lib/mockData';
 
@@ -17,10 +18,11 @@ const CoffeeCard = ({ coffee }: CoffeeCardProps) => {
       className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100"
     >
       <div className="relative h-64 w-full">
-        <img 
+        <Image 
           src={coffee.imageUrl} 
           alt={coffee.name} 
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       </div>
       <div className="p-6">
