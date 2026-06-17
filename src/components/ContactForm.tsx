@@ -20,12 +20,16 @@ export default function ContactForm() {
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
 
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "email") {
+      setIsEmailInvalid(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,12 +37,14 @@ export default function ContactForm() {
     
     if (!validateEmail(formData.email)) {
       setErrorMessage("Please enter a valid email address.");
+      setIsEmailInvalid(true);
       setStatus("error");
       return;
     }
 
     setStatus("loading");
     setErrorMessage("");
+    setIsEmailInvalid(false);
 
     try {
       const response = await fetch("/api/contacts", {
@@ -135,7 +141,7 @@ export default function ContactForm() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    aria-invalid={status === "error" && errorMessage.toLowerCase().includes("email")}
+                    aria-invalid={status === "error" && isEmailInvalid}
                     aria-describedby={status === "error" ? "form-error" : undefined}
                     className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 />

@@ -3,42 +3,17 @@ import { db } from '@/lib/db';
 import { contacts } from '@/db/schema';
 import { validateEmail } from '@/lib/validation';
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS = 5;
-let requestCount = 0;
-
 export async function POST(request: Request) {
   try {
     // NOTE: Use of 'x-forwarded-for' assumes the app is behind a trusted proxy 
-    // that correctly sets this header. There is a risk of spoofing if the 
-    // proxy is not configured to strip incoming 'x-forwarded-for' headers.
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    const now = Date.now();
+    // that correctly sets this header. We extract the first IP in the list.
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown';
 
-    // Periodically prune expired entries to prevent memory leaks
-    requestCount++;
-    if (requestCount % 100 === 0) {
-      for (const [key, value] of rateLimitMap.entries()) {
-        if (now > value.resetAt) {
-          rateLimitMap.delete(key);
-        }
-      }
-    }
+    // TODO: Implement distributed rate limiting (e.g., using Redis/Upstash).
+    // In-memory rate limiting is ineffective in serverless environments as 
+    // state is not shared across function instances.
 
-    const rateLimit = rateLimitMap.get(ip);
-
-    if (rateLimit && now < rateLimit.resetAt) {
-      if (rateLimit.count >= MAX_REQUESTS) {
-        return NextResponse.json(
-          { error: 'Too many requests. Please try again later.' },
-          { status: 429 }
-        );
-      }
-      rateLimit.count++;
-    } else {
-      rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    }
 
     const body = await request.json();
     const { firstName, lastName, email, phone } = body;
