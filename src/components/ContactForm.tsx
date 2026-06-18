@@ -76,6 +76,17 @@ export default function ContactForm({ submitAction }: ContactFormProps) {
           />
         </div>
 
+        {/* Honeypot field to prevent spam */}
+        <div className="hidden" aria-hidden="true">
+          <input
+            type="text"
+            name="honeypot"
+            tabIndex={-1}
+            autoComplete="off"
+            className="opacity-0 pointer-events-none"
+          />
+        </div>
+
         <div className="space-y-2">
           <label htmlFor="phone" className="text-sm font-medium text-gray-700">
             Phone Number (Optional)
